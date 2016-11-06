@@ -14,6 +14,35 @@ function Game(canvas) {
   
   // TODO Listen for events here and dispatch them 
 
+  // Listen for the "mousedown" event
+  canvas.addEventListener("mousedown", (function(event) {
+    event = _.clone(event);
+    event.type = "mousedown";
+    // Positional dispatch
+    this.pointDispatch(event);
+  }).bind(this));
+
+  // Listen for the "mouseup" event
+  canvas.addEventListener("mouseup", (function(event) {
+    event = _.clone(event);
+    event.type = "mouseup";
+    // Focus dispatch
+    if (!this.dispatchDragFocus(event)) {
+      // Positional dispatch
+      this.pointDispatch(event);
+    }
+  }).bind(this));
+
+  // Listen for the "mousemove" event
+  canvas.addEventListener("mousemove", (function(event) {
+    event = _.clone(event);
+    event.type = "mousemove";
+    // Focus dispatch
+    if (!this.dispatchDragFocus(event)) {
+      // Positional dispatch
+      this.pointDispatch(event);
+    }
+  }).bind(this));
 };
 
 
@@ -41,6 +70,21 @@ Game.prototype.addActor = function(actor) {
  */
 Game.prototype.actorsUnder = function(left, top, width, height) {
   //TODO
+  var array = [];
+  // In reverse drawing order
+  for (var i = this.actors.length -1; i >= 0; i--) {
+    var actor = this.actors[i];
+
+    // Check if the actor's bounds overlap the given rectangular area
+    var x = Math.max(actor.x, left);
+    var num1 = Math.min(actor.x + actor.width, left + width);
+    var y = Math.max(actor.y, top);
+    var num2 = Math.min(actor.y + actor.height, top + height);
+    if (num1 >= x && num2 >= y) {
+      array.push(actor);
+    }
+  }
+  return array;
 }
 
 /**
@@ -54,6 +98,27 @@ Game.prototype.actorsUnder = function(left, top, width, height) {
  */
 Game.prototype.pointDispatch = function(event) {
   //TODO
+  var consumed = false;
+
+  var actor_dispatch = [];
+
+  // Get the x, y position of the mouse relative on canvas
+  var canvasRect = document.getElementsByTagName('canvas')[0].getBoundingClientRect();
+  var eventX = event.clientX - canvasRect.left;
+  var eventY = event.clientY - canvasRect.top;
+
+  actor_dispatch = this.actorsUnder(eventX, eventY, 0, 0);
+
+  // In reverse drawing order
+  for (var i = actor_dispatch.length -1; i >= 0; i--) {
+    // If a actor takes the event, return true
+    if (actor_dispatch[i].deliverEvent(event)) {
+      consuemd = true;
+      console.log("pointDispatch: "+consumed);
+      return consumed;
+    }
+  }
+  return consumed;
 }
 
 /**
@@ -72,6 +137,16 @@ Game.prototype.pointDispatch = function(event) {
  */
 Game.prototype.areaDispatch = function(area, event) {
   //TODO
+  var actor_dispatch = [];
+  actor_dispatch = this.actorsUnder(area.left, area.top, area.width, area.height);
+  // In reverse drawing order
+  for (var i = actor_dispatch.length -1; i >= 0; i--) {
+    // If a actor takes the event, return true
+    if (actor_dispatch[i].deliverEvent(event)) {
+      return true;
+    }
+  }
+  return false; 
 }
 
 /**
@@ -82,6 +157,7 @@ Game.prototype.areaDispatch = function(area, event) {
  */
 Game.prototype.directDispatch = function(event, actor) {
   //TODO
+  return actor.deliverEvent(event);
 }
 
 /**
@@ -93,6 +169,16 @@ Game.prototype.directDispatch = function(event, actor) {
  */
 Game.prototype.dispatchToAll = function(event) {
   //TODO
+  var consumed = false;
+  // In reverse drawing order
+  for (var i = this.actors.length -1; i >= 0; i--) {
+    if (this.actors[i].deliverEvent(event)) {
+      consumed = true;
+      return consumed;
+      // Continue, do not stop
+    }
+  }
+  return consumed;
 }
 
 /**
@@ -105,6 +191,15 @@ Game.prototype.dispatchToAll = function(event) {
  */
 Game.prototype.dispatchTryAll = function(event) {
   //TODO
+  var consumed = false;
+  // In reverse drawing order
+  for (var i = this.actors.length -1; i >= 0; i--) {
+    if (this.actors[i].deliverEvent(event)) {
+      consumed = true;
+      return consumed;
+    }
+  }
+  return consumed;
 }
 
 /**
@@ -123,6 +218,29 @@ Game.prototype.dispatchTryAll = function(event) {
 
 Game.prototype.dispatchDragFocus = function(event) {
   //TODO
+  var consumed = false;
+  // If there is no current drag focus 
+  if (this.dragFocus == null) {
+    //console.log("dragfocus not consumed");
+    return consumed;
+  }
+  
+  // If the mouse is moving and mouse is down (i.e. dragmove)
+  if ( (event.type == "mousemove") ) {
+    event = _.clone(event);
+    event.type = "dragmove";
+  }
+  // Else if the mouse is up (i.e. dragend 
+  else if (event.type == "mouseup") {
+    event = _.clone(event);
+    event.type = "dragend";
+  }
+
+  // Adjust x, y position
+  event.clientX = event.clientX - this.grabPointX;
+  event.clientY = event.clientY - this.grabPointY;
+  consumed = this.dragFocus.deliverEvent(event);
+  return consumed;
 }
 
 /**
@@ -130,6 +248,12 @@ Game.prototype.dispatchDragFocus = function(event) {
  */
 Game.prototype.onDraw = function() {
   //TODO
+  // Clear the canvas
+  this.context.clearRect(0, 0, this.width, this.height);
+  // Draw all of the actors
+  for (var actor in this.actors) {
+    this.actors[actor].draw(this.context);
+  }
 }
 
 /**
@@ -174,6 +298,7 @@ Game.prototype.releaseDragFocus = function() {
  * @param {Integer} duration in ms for the animation
  */
 Game.prototype.newAnimation = function(movingActor, targetActor, endMessage, passoverMessage, duration) {
+  console.log("game.js newAnimation starts");
   var self = this;
   var start = Date.now();
   var target_x = targetActor.x + (targetActor.width / 2) - (movingActor.width / 2);

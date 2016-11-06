@@ -10,6 +10,13 @@ var Actions = (function () {
      */
     changeImg: function(event, params, actor) {
       //TODO
+      console.log("Action: changeImg");
+      if (params == undefined) {
+        actor.img = null;
+      }
+      else {
+        actor.img = params.img;
+      } 
     },
     /**
      * Moves the character to exact x,y coordinates (no bounds checking)
@@ -19,6 +26,9 @@ var Actions = (function () {
      */
     moveTo: function(event, params, actor) {
       //TODO
+      console.log("Action: moveTo");
+      actor.x = params.targetAbsoluteX;
+      actor.y = params.targetAbsoluteY;
     },
     /**
      * Moves the character by the increment specified by x and y, relative to
@@ -29,12 +39,24 @@ var Actions = (function () {
      */
     moveInc: function(event, params, actor) {
       //TODO
+      console.log("Action: moveInc");
+      actor.x += params.targetOffsetX;
+      actor.y += params.targetOffsetY;
     },
     /**
      * Move the character to the x, y coordinates of the corresponding event
      */
     followEventPosition: function(event, params, actor) {
       //TODO
+      console.log("Action: followEventPosition");
+      if (event.type == "animmove"|| event.type == "animend") {
+        actor.x = event.offsetX;
+        actor.y = event.offsetY;
+      } 
+      else {
+        actor.x = event.clientX;
+        actor.y = event.clientY;
+      }
     },
     /**
      *  Cause the character to begin the specified animation
@@ -49,18 +71,30 @@ var Actions = (function () {
      */
     runAnim: function(event, params, actor) {
       //TODO
+      console.log("Action: runAnim");
+
+      actor.parent.newAnimation(params.movingActor, params.targetActor, params.endMessage, params.passOverMessage, params.duration);
     },
     /**
      * Cause the character to be the focus of a drag event
      */    
     getDragFocus: function(event, params, actor) {
-       //TODO
+      //TODO
+      console.log("Action: getDragFocus");
+
+      grabPointX = event.clientX - actor.x;   // distance from the left of the actor that the cursor was when the drag was started
+      grabPointY = event.clientY - actor.y;
+
+      actor.parent.requestDragFocus(actor, grabPointX, grabPointY);
     },
     /**
      * Cause the character to release focus of the drag event
      */
     dropDragFocus: function(event, params, actor) {
       //TODO
+      console.log("Action: dropDragFocus");
+
+      actor.parent.releaseDragFocus();
     },
     /**
      * Send the specified message to the specified target character
@@ -70,6 +104,8 @@ var Actions = (function () {
      */
     sendMessage: function(event, params, actor) {
        //TODO
+       console.log("Action: sendMessage");
+       actor.parent.sendMessage(params.actor, params.message);
     },
     /**
      * Write a debug message to the debug log with the tag “ssui”
@@ -78,6 +114,7 @@ var Actions = (function () {
      */
     debugMessage: function(event, params, actor) {
       //TODO
+      console.log("ssui: "+params.message);
     }
   };
 })();

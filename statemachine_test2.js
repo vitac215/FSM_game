@@ -4,40 +4,40 @@
 var loadCounter = 0;
 var totalImg = 0;
 
-var face = new Image();
+var candy = new Image();
 totalImg++;
-face.onload = function() {
+candy.onload = function() {
   loadCounter++;
 }
-face.src = 'chris_mac.jpg';
+candy.src = 'imgs/candy.png';
 
-var cannon = new Image();
+var specialcandy = new Image();
 totalImg++;
-cannon.onload = function() {
+specialcandy.onload = function() {
   loadCounter++;
 }
-cannon.src = 'cannon.png';
+specialcandy.src = 'imgs/candy2.png';
 
-var cannon_ball = new Image();
+var kids = new Image();
 totalImg++;
-cannon_ball.onload = function() {
+kids.onload = function() {
   loadCounter++;
 }
-cannon_ball.src = 'cannon_ball.jpg';
+kids.src = 'imgs/kids.png';
 
-var explosion = new Image();
+var kid = new Image();
 totalImg++;
-explosion.onload = function() {
+kid.onload = function() {
   loadCounter++;
 }
-explosion.src = 'explosion.png';
+kid.src = 'imgs/kid.png';
 
 var crosshair = new Image();
 totalImg++;
 crosshair.onload = function() {
   loadCounter++;
 }
-crosshair.src = 'crosshair.png';
+crosshair.src = 'imgs/crosshair.png';
 
 // function for randomly generating position
 // Returns a random integer between min (included) and max (included)
@@ -52,13 +52,13 @@ function getRandomIntInclusive(min, max) {
 var multiplier = 1;
 
 //Create our actors and their FSMs
-var gun = new Actor({
-  name: "gun",
-  height: 50,
-  width: 50,
+var kidscrowd = new Actor({
+  name: "kidscrowd",
+  height: 100,
+  width: 100,
   x: 0,
-  y: 250,
-  img: cannon
+  y: 200,
+  img: kids
 }); 
 
 var sight = new Actor({
@@ -70,10 +70,10 @@ var sight = new Actor({
   img: crosshair
 }); 
 
-var bullet = new Actor({
-  name: "bullet",
-  height: 25,
-  width: 25,
+var kidrunning = new Actor({
+  name: "kid",
+  height: 80,
+  width: 60,
   x: 45,
   y: 251,
   img: null
@@ -81,41 +81,51 @@ var bullet = new Actor({
 
 var target1 = new Actor({
   name: "target1",
-  height: 50,
-  width: 50,
+  height: 30,
+  width: 30,
   x: getRandomIntInclusive(0,350),
   y: getRandomIntInclusive(0,200),
-  img: face
+  img: candy
 }); 
 
 var target2 = new Actor({
   name: "target2",
-  height: 50,
-  width: 50,
+  height: 30,
+  width: 30,
   x: getRandomIntInclusive(0,350),
   y: getRandomIntInclusive(0,200),
-  img: face
+  img: candy
 }); 
 
 var target3 = new Actor({
   name: "target3",
-  height: 50,
-  width: 50,
+  height: 30,
+  width: 30,
   x: getRandomIntInclusive(0,350),
   y: getRandomIntInclusive(0,200),
-  img: face
+  img: candy
 }); 
 
 var target4 = new Actor({
   name: "target4",
-  height: 50,
-  width: 50,
+  height: 30,
+  width: 30,
   x: getRandomIntInclusive(0,350),
   y: getRandomIntInclusive(0,200),
-  img: face
+  img: candy
 }); 
 
-gun.setFSM('start', { 
+var targetSpecial = new Actor({
+  name: "targetSpecial",
+  height: 30,
+  width: 30,
+  x: getRandomIntInclusive(0,350),
+  y: getRandomIntInclusive(0,200),
+  img: specialcandy
+}); 
+
+
+kidscrowd.setFSM('start', { 
     'start': { }
 });
 
@@ -125,7 +135,7 @@ targetFSM = {
             predicate: function(event, actor){ 
                 return event.message == "boom" },
             actions: [{ func: Actions.changeImg,
-                        params: { img: explosion }},
+                        params: { img: null }},
                       { func: function(event, params, actor){
                              var score_ele = document.getElementById("score");
                              var score = parseInt(score_ele.innerHTML) + (100 * multiplier);
@@ -146,7 +156,7 @@ targetFSM = {
     'exploded': {
         'tick': {
             actions: [{ func: Actions.changeImg,
-                        params: { img: face }},
+                        params: { img: candy }},
                       { func: function(event, params, actor){
                             var coords =  { targetAbsoluteX: getRandomIntInclusive(0,350),
                                             targetAbsoluteY: getRandomIntInclusive(0,200) };
@@ -157,20 +167,73 @@ targetFSM = {
         }
     }
 };
+
+targetSpecialFSM = {
+    'ready': {
+        'tick': {
+            actions: [{ func: Actions.changeImg,
+                        params: { img: specialcandy }},
+                      { func: function(event, params, actor){
+                            var coords =  { targetAbsoluteX: getRandomIntInclusive(0,350),
+                                            targetAbsoluteY: getRandomIntInclusive(0,200) };
+                            Actions.moveTo(event, coords, actor); 
+                        },
+                      }],
+            endState: 'ready'
+        },
+        'message': {
+            predicate: function(event, actor){ 
+                return event.message == "boom" },
+            actions: [{ func: Actions.changeImg,
+                        params: { img: null }},
+                      { func: function(event, params, actor){
+                             var score_ele = document.getElementById("score");
+                             var score = parseInt(score_ele.innerHTML) + 1000;
+                             score_ele.innerHTML = "" + score;},
+                      },
+                      { func: function(event, params, actor){
+                          multiplier += 1;
+                          setTimeout(function(){ 
+                              multiplier -= 1;
+                          }, 1000);
+                          setTimeout(function(){ 
+                              actor.parent.directDispatch({type: 'tick'}, actor);
+                          }, 300);
+                      }}],
+            endState: 'exploded'
+        }
+    },
+    'exploded': {
+        'tick': {
+            actions: [{ func: Actions.changeImg,
+                        params: { img: specialcandy }},
+                      { func: function(event, params, actor){
+                          console.log("here");
+                            var coords =  { targetAbsoluteX: getRandomIntInclusive(0,350),
+                                            targetAbsoluteY: getRandomIntInclusive(0,200) };
+                            Actions.moveTo(event, coords, actor); 
+                        },
+                      }],
+            endState: 'ready'
+        }
+    }
+};
+
 target1.setFSM('ready', targetFSM);
 target2.setFSM('ready', targetFSM);
 target3.setFSM('ready', targetFSM);
 target4.setFSM('ready', targetFSM);
+targetSpecial.setFSM('ready', targetSpecialFSM);
 
-bullet.setFSM('start', { 
+kidrunning.setFSM('start', { 
     'start': {
         'buttonpress': {
             predicate: function(event, actor){ 
                 return event.target.id == "fire" },
             actions: [{ func: Actions.changeImg,
-                        params: { img: cannon_ball }},
+                        params: { img: kid }},
                       { func: Actions.runAnim,
-                        params: { movingActor: bullet,
+                        params: { movingActor: kidrunning,
                                   targetActor: sight,
                                   duration: 2000,
                                   passOverMessage: "boom",
@@ -188,7 +251,7 @@ bullet.setFSM('start', {
         },
         "animstart": {
             actions: [{ func: Actions.changeImg,
-                        params: { img: cannon_ball }}], 
+                        params: { img: kid }}], 
             endState: "start"
         },
         "animmove": {
@@ -232,12 +295,13 @@ sight.setFSM('unfocused', {
 //When the DOM has loaded, actually setup our game
 window.onload = function() { 
   var game = new Game(document.getElementById("game"));
+  game.addActor(targetSpecial);
   game.addActor(target1);
   game.addActor(target2);
   game.addActor(target3);
   game.addActor(target4);
-  game.addActor(bullet);
-  game.addActor(gun);
+  game.addActor(kidscrowd);
+  game.addActor(kidrunning);
   game.addActor(sight);
 
   document.getElementById("fire").addEventListener("click", function(event) {
@@ -248,12 +312,19 @@ window.onload = function() {
   
   //Wait for all of the images to load in before we start the game
   var runGame = function() {
-    if (loadCounter >= totalImg)
+    if (loadCounter >= totalImg) {
       game.run();
-    else
+    }
+    else {
       setTimeout(function() { runGame() }, 200);
+    }
   }
   runGame();
+
+  setInterval(function(){ 
+      targetSpecial.parent.directDispatch({type: 'tick'}, targetSpecial);
+  }, 4500);
+
 };
 
 

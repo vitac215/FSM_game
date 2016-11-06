@@ -1,0 +1,46 @@
+body {
+	background-color: #00001a;
+}
+
+h1, h2, h3, h4, p {
+	color: #ffffff;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+}
+
+#title {
+    color: #f69f0a;
+}
+
+#title_img {
+	margin-left: 20px;
+	vertical-align: middle;
+}
+
+.description {
+    width: 500px;
+    margin-top: 0px;
+}
+
+canvas {
+	color: white;
+	background-color: #ffffff;
+}
+
+#game {
+    border-style: solid;
+    border-width: 2px;
+}
+
+#fire {
+    margin: 10px;
+}
+
+.score {
+	margin-top: 0px;
+}
+

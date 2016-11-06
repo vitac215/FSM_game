@@ -1,0 +1,13 @@
+Author: Vita Chen
+AndrewID: kezhouc
+
+Content: 
+- Notes
+I added an extra “name” field to the actor objects in statemachine_test.js and actor.js.
+
+
+- Online Sources 
+For this assignment, I used the following online sources:
+http://stackoverflow.com/questions/2752349/fast-rectangle-to-rectangle-intersection
+http://stackoverflow.com/questions/5223/length-of-a-javascript-object-or-associative-array
+http://stackoverflow.com/questions/17130395/real-mouse-position-in-canvas
