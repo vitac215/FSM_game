@@ -56,7 +56,7 @@ var kidscrowd = new Actor({
   name: "kidscrowd",
   height: 100,
   width: 100,
-  x: 0,
+  x: 150,
   y: 200,
   img: kids
 }); 
@@ -74,8 +74,8 @@ var kidrunning = new Actor({
   name: "kid",
   height: 80,
   width: 60,
-  x: 45,
-  y: 251,
+  x: 150,
+  y: 200,
   img: null
 }); 
 
@@ -131,6 +131,17 @@ kidscrowd.setFSM('start', {
 
 targetFSM = {
     'ready': {
+        'tick': {
+            actions: [{ func: Actions.changeImg,
+                        params: { img: candy }},
+                      { func: function(event, params, actor){
+                            var coords =  { targetAbsoluteX: getRandomIntInclusive(0,350),
+                                            targetAbsoluteY: getRandomIntInclusive(0,200) };
+                            Actions.moveTo(event, coords, actor); 
+                        },
+                      }],
+            endState: 'ready'
+        },
         'message': {
             predicate: function(event, actor){ 
                 return event.message == "boom" },
@@ -245,8 +256,8 @@ kidrunning.setFSM('start', {
             predicate: function(event, actor){ 
                 return event.message == "hit" },
             actions: [{ func: Actions.moveTo,
-                        params: { targetAbsoluteX: 45,
-                                  targetAbsoluteY: 251 }}],
+                        params: { targetAbsoluteX: 150,
+                                  targetAbsoluteY: 200 }}],
             endState: "start",
         },
         "animstart": {
@@ -262,8 +273,8 @@ kidrunning.setFSM('start', {
             actions: [{ func: Actions.followEventPosition },
                       { func: Actions.changeImg },
                       { func: Actions.moveTo,
-                        params: { targetAbsoluteX: 45,
-                                  targetAbsoluteY: 251 }}],
+                        params: { targetAbsoluteX: 150,
+                                  targetAbsoluteY: 200 }}],
             endState: "start"
         }
         
@@ -321,9 +332,26 @@ window.onload = function() {
   }
   runGame();
 
+  // Move the candies every 5 secs, and the special candy every 2 secs
+  setInterval(function(){ 
+        target1.parent.directDispatch({type: 'tick'}, target1);
+  }, 5000);
+
+  setInterval(function(){ 
+        target2.parent.directDispatch({type: 'tick'}, target2);
+  }, 5000);
+
+  setInterval(function(){ 
+        target3.parent.directDispatch({type: 'tick'}, target3);
+  }, 5000);
+
+  setInterval(function(){ 
+        target4.parent.directDispatch({type: 'tick'}, target4);
+  }, 5000);
+
   setInterval(function(){ 
       targetSpecial.parent.directDispatch({type: 'tick'}, targetSpecial);
-  }, 4500);
+  }, 2000);
 
 };
 
