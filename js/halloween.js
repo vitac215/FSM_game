@@ -354,6 +354,3 @@ window.onload = function() {
   }, 2000);
 
 };
-
-
-
