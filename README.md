@@ -14,7 +14,7 @@ It can be accessed on [GitHub page](https://vitac215.github.io/FSM_game/hallowee
 ## Game Engine Usage
 * A game is defined by a Game object, which models a game using state machines on an HTML5 Canvas. A game object is composed of several actors, which each have their own state machines.
 * The engine handles input and event dispatch (dragging, focus and positional dispatch).
-* To use this game engine, the user needs to write the state machines for the game's actors. The state machines will be described in JSON in the following format:
+* To use this game engine, user need to write the state machines for the game's actors. The state machines will be described in JSON in the following format:
 ```
   var sampleFSM = {
       "start": {
